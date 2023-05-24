@@ -18,9 +18,11 @@ edition = "2021"
 [lib]
 name = "libcrs"
 path = "lib/lib.rs"
+crate-type = ["staticlib", "cdylib"]#So that C programs can link to it
 
 [profile.dev]
 incremental = true
+panic = "abort"#For now to avoid needing eh_personality
 
 [profile.release]
 codegen-units = 1
