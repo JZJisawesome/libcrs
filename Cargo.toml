@@ -1,0 +1,38 @@
+[package]
+name = "libcrs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+#[build-dependencies]
+#cbindgen = "0.24.0"
+
+[features]
+#default = []
+#nightly-features = ["nightly-features-benches"]
+#nightly-features-benches = []
+
+[lib]
+name = "libcrs"
+path = "lib/lib.rs"
+
+[profile.dev]
+incremental = true
+
+[profile.release]
+codegen-units = 1
+strip = true
+overflow-checks = false
+panic = "abort"
+lto = true
+
+[profile.release-with-debug]
+inherits = "release"
+strip = false
+overflow-checks = false
+panic = "abort"
+lto = false
+debug = true
