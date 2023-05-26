@@ -1,20 +1,4 @@
-
 #![no_std]
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
 
 #[panic_handler]
 fn panic_handler(_: &core::panic::PanicInfo) -> ! {
@@ -195,13 +179,58 @@ pub extern "C" fn strtod(the_str: *const core::ffi::c_char, str_end: *const core
     todo!()
 }
 
-#[no_mangle]
+/*#[no_mangle]
 pub extern "C" fn strtold(the_str: *const core::ffi::c_char, str_end: *const core::ffi::c_char) -> core::ffi::c_longdouble {
     todo!()
-}
+}*/
 
 //TODO number -> string functions
 
 //TODO other string functions
 
+//FIXME we can't write strlen using anything in libcore since otherwise CStr and friends actually tries to call this function to use as its strlen implementation
+#[no_mangle]
+pub extern "C" fn strlen(/*mut*/ the_str: *const core::ffi::c_char) -> core::ffi::c_ulong {
+    //TODO what if the_str is null?
+    let c_str = unsafe { core::ffi::CStr::from_ptr(the_str) };
+    c_str.to_bytes().len() as core::ffi::c_ulong
+    /*let mut count = 0;
+    while unsafe { *the_str != 0 } {
+        count += 1;
+        the_str = unsafe { the_str.add(1) };
+    }
 
+    count
+    */
+}
+
+//TODO strlen_s
+
+#[no_mangle]
+pub extern "C" fn memchr(ptr: *const core::ffi::c_void, ch: core::ffi::c_int, count: core::ffi::c_ulong) -> *const core::ffi::c_void {
+    let actual_ptr = ptr as *const u8;
+    let actual_ch = ch as u8;
+    let slice = unsafe { core::slice::from_raw_parts(actual_ptr, count as usize) };
+    if let Some(pos) = slice.iter().position(|&&x| x == actual_ch) {
+        unsafe { actual_ptr.add(pos) as *mut core::ffi::c_void }
+    } else {
+        core::ptr::null()
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn testing123() {
+    todo!()
+}
+
+/* Tests */
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn strlen_sanity() {
+        assert_eq!(strlen(unsafe { b"Hello, world!\0".as_ptr() as *const i8 }), 13);
+    }
+}
